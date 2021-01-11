@@ -1,5 +1,10 @@
 # TRACK: https://github.com/mecodia/cert-manager-webhook-hetzner
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
 # Source: cert-manager-webhook-hetzner/templates/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
