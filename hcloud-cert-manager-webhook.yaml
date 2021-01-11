@@ -146,7 +146,7 @@ spec:
               mountPath: /tls
               readOnly: true
           resources:
-            {}
+            { }
       volumes:
         - name: certs
           secret:
@@ -202,9 +202,9 @@ spec:
   issuerRef:
     name: cert-manager-webhook-hetzner-ca
   dnsNames:
-  - cert-manager-webhook-hetzner
-  - cert-manager-webhook-hetzner.default
-  - cert-manager-webhook-hetzner.default.svc
+    - cert-manager-webhook-hetzner
+    - cert-manager-webhook-hetzner.default
+    - cert-manager-webhook-hetzner.default.svc
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Create a selfsigned Issuer, in order to create a root CA certificate for
@@ -217,7 +217,7 @@ metadata:
   labels:
     app: webhook-hetzner
 spec:
-  selfSigned: {}
+  selfSigned: { }
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Create an Issuer that uses the above generated CA certificate to issue certs
