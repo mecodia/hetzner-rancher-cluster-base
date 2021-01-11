@@ -1,16 +1,9 @@
 # TRACK: https://github.com/mecodia/cert-manager-webhook-hetzner
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: cert-manager
----
 # Source: cert-manager-webhook-hetzner/templates/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cert-manager-webhook-hetzner
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
 ---
@@ -20,7 +13,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: cert-manager-webhook-hetzner:domain-solver
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
 rules:
@@ -38,7 +30,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cert-manager-webhook-hetzner:auth-delegator
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
 roleRef:
@@ -56,7 +47,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cert-manager-webhook-hetzner:domain-solver
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
 roleRef:
@@ -77,7 +67,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cert-manager-webhook-hetzner:webhook-authentication-reader
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
 roleRef:
@@ -168,7 +157,6 @@ apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
   name: v1alpha1.dns.hetzner.cloud
-  namespace: cert-manager
   labels:
     app: webhook-hetzner
   annotations:
