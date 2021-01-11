@@ -131,6 +131,10 @@ spec:
         - name: cert-manager-webhook-hetzner
           image: "mecodia/cert-manager-webhook-hetzner:latest"
           imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
           args:
             - --tls-cert-file=/tls/tls.crt
             - --tls-private-key-file=/tls/tls.key
