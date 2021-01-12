@@ -1,11 +1,16 @@
-# TRACK: https://github.com/mecodia/cert-manager-webhook-hetzner
+# TRACK:
+---
 # Source: cert-manager-webhook-hetzner/templates/rbac.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cert-manager-webhook-hetzner
+  namespace: cert-manager
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 ---
 # Source: cert-manager-webhook-hetzner/templates/rbac.yaml
 # Grant cert-manager permission to validate using our apiserver
@@ -15,6 +20,9 @@ metadata:
   name: cert-manager-webhook-hetzner:domain-solver
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 rules:
   - apiGroups:
       - dns.hetzner.cloud
@@ -32,6 +40,9 @@ metadata:
   name: cert-manager-webhook-hetzner:auth-delegator
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -49,6 +60,9 @@ metadata:
   name: cert-manager-webhook-hetzner:domain-solver
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -67,8 +81,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: cert-manager-webhook-hetzner:webhook-authentication-reader
+  namespace: kube-system
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -87,6 +105,9 @@ metadata:
   namespace: cert-manager
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
   type: ClusterIP
   ports:
@@ -96,6 +117,7 @@ spec:
       name: https
   selector:
     app: webhook-hetzner
+    release: RELEASE-NAME
 ---
 # Source: cert-manager-webhook-hetzner/templates/deployment.yaml
 apiVersion: apps/v1
@@ -105,15 +127,20 @@ metadata:
   namespace: cert-manager
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: webhook-hetzner
+      release: RELEASE-NAME
   template:
     metadata:
       labels:
         app: webhook-hetzner
+        release: RELEASE-NAME
     spec:
       serviceAccountName: cert-manager-webhook-hetzner
       containers:
@@ -135,18 +162,18 @@ spec:
             httpGet:
               scheme: HTTPS
               path: /healthz
-              port: https
+              port: 8443
           readinessProbe:
             httpGet:
               scheme: HTTPS
               path: /healthz
-              port: https
+              port: 8443
           volumeMounts:
             - name: certs
               mountPath: /tls
               readOnly: true
           resources:
-            { }
+            {}
       volumes:
         - name: certs
           secret:
@@ -159,8 +186,11 @@ metadata:
   name: v1alpha1.dns.hetzner.cloud
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
   annotations:
-    cert-manager.io/inject-ca-from: "default/cert-manager-webhook-hetzner-webhook-tls"
+    cert-manager.io/inject-ca-from: "cert-manager/cert-manager-webhook-hetzner-webhook-tls"
 spec:
   group: dns.hetzner.cloud
   groupPriorityMinimum: 1000
@@ -172,13 +202,16 @@ spec:
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Generate a CA Certificate used to sign certificates for the webhook
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1alpha3
 kind: Certificate
 metadata:
   name: cert-manager-webhook-hetzner-ca
-  namespace: cert-manager
+  namespace: "cert-manager"
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
   secretName: cert-manager-webhook-hetzner-ca
   duration: 43800h # 5y
@@ -189,45 +222,54 @@ spec:
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Finally, generate a serving certificate for the webhook to use
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1alpha3
 kind: Certificate
 metadata:
   name: cert-manager-webhook-hetzner-webhook-tls
-  namespace: cert-manager
+  namespace: "cert-manager"
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
   secretName: cert-manager-webhook-hetzner-webhook-tls
   duration: 8760h # 1y
   issuerRef:
     name: cert-manager-webhook-hetzner-ca
   dnsNames:
-    - cert-manager-webhook-hetzner
-    - cert-manager-webhook-hetzner.default
-    - cert-manager-webhook-hetzner.default.svc
+  - cert-manager-webhook-hetzner
+  - cert-manager-webhook-hetzner.cert-manager
+  - cert-manager-webhook-hetzner.cert-manager.svc
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Create a selfsigned Issuer, in order to create a root CA certificate for
 # signing webhook serving certificates
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1alpha3
 kind: Issuer
 metadata:
   name: cert-manager-webhook-hetzner-selfsign
-  namespace: cert-manager
+  namespace: "cert-manager"
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
-  selfSigned: { }
+  selfSigned: {}
 ---
 # Source: cert-manager-webhook-hetzner/templates/pki.yaml
 # Create an Issuer that uses the above generated CA certificate to issue certs
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1alpha3
 kind: Issuer
 metadata:
   name: cert-manager-webhook-hetzner-ca
-  namespace: cert-manager
+  namespace: "cert-manager"
   labels:
     app: webhook-hetzner
+    chart: cert-manager-webhook-hetzner-0.1.0
+    release: RELEASE-NAME
+    heritage: Helm
 spec:
   ca:
     secretName: cert-manager-webhook-hetzner-ca
